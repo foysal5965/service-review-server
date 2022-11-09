@@ -44,6 +44,12 @@ async function run(){
             const result= await reviewCollection.insertOne(reviews)
             res.send(result)
         })
+        app.post('/addServices', async(req,res)=>{
+            const reviews= req.body;
+            console.log(reviews)
+            const result= await serviceCollection.insertOne(reviews)
+            res.send(result)
+        })
     app.get('/review', async(req,res)=>{
         
         let  query={};
@@ -80,4 +86,4 @@ async function run(){
     }
 }
 run().catch(er=>console.log())
-app.listen(port, (err)=>console.log(err))
+app.listen(port, (err)=>console.log())

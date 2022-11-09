@@ -5,6 +5,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 app.use(cors())
+app.use(express.json())
 app.get('/',(req, res)=>{
     res.send('assignment is wating for me')
 })
@@ -16,8 +17,10 @@ const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.PASSWORD}@clus
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run(){
-    const serviceCollection = client.db('mental-health-db').collection('services')
+   
     try{
+        const serviceCollection = client.db('mental-health-db').collection('services')
+        const reviewCollection = client.db('mental-health-db').collection('review')
         app.get('/services', async(req,res)=>{
             const query= {};
             const cursor= serviceCollection.find(query);
@@ -36,6 +39,34 @@ async function run(){
             const cursor=await serviceCollection.findOne(query);
             res.send(cursor)
         })
+        app.post('/review',async(req,res)=>{
+            const reviews= req.body;
+            const result= await reviewCollection.insertOne(reviews)
+            res.send(result)
+        })
+    app.get('/review', async(req,res)=>{
+        
+        let  query={};
+        if(req.query._id){
+            query={
+                _id:req.query._id
+            }
+        }
+        const cursor= reviewCollection.find(query);
+        const result= await cursor.toArray()
+        res.send(result)
+    })
+        app.get('/myreviews', async (req,res)=>{
+            let query= {};
+            if(req.query.email){
+                query={
+                    email: req.query.email
+                }
+            }
+            const cursor = reviewCollection.find(query)
+            const result= await cursor.toArray();
+            res.send(result)
+        })
 
     }
     finally{
@@ -43,4 +74,4 @@ async function run(){
     }
 }
 run().catch(er=>console.log())
-app.listen(port, (err)=>console.log())
+app.listen(port, (err)=>console.log(err))
